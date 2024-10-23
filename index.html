@@ -1,103 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- Previous head content remains the same -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mario Math Game</title>
-    <!-- Previous styles remain the same -->
-    <style>
-        /* Previous styles here */
-        .sound-button {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 8px;
-        }
-        
-        .coin-animation {
-            position: absolute;
-            color: gold;
-            font-size: 24px;
-            animation: floatUp 0.5s ease-out;
-            pointer-events: none;
-        }
-        
-        @keyframes floatUp {
-            0% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-        }
-    </style>
+    <title>Mario Math Test</title>
 </head>
 <body>
-    <!-- Previous HTML structure remains the same -->
-    <script>
-        // Add the coin sound effect
-        const coinSound = new Audio('https://themushroomkingdom.net/sounds/wav/smb/smb_coin.wav');
-        
-        function playCoinEffect(input) {
-            if (!isMuted) {
-                // Play sound
-                coinSound.currentTime = 0;
-                coinSound.play();
-                
-                // Create coin animation
-                const coin = document.createElement('div');
-                coin.textContent = '🟡';
-                coin.className = 'coin-animation';
-                
-                // Position the coin near the input
-                const rect = input.getBoundingClientRect();
-                coin.style.left = `${rect.left}px`;
-                coin.style.top = `${rect.top}px`;
-                
-                document.body.appendChild(coin);
-                
-                // Remove the coin element after animation
-                setTimeout(() => {
-                    coin.remove();
-                }, 500);
-            }
-        }
-
-        function handleInput(event) {
-            if (!isGameActive) {
-                startTimer();
-            }
-            
-            const input = event.target;
-            const row = input.dataset.row;
-            const col = input.dataset.col;
-            const value = input.value === '' ? '' : parseInt(input.value);
-            userAnswers[`${row}-${col}`] = value;
-
-            // Play coin sound if answer is correct
-            if (value === correctAnswers[`${row}-${col}`]) {
-                playCoinEffect(input);
-            }
-        }
-
-        // Previous JavaScript code remains the same...
-
-        function toggleSound() {
-            isMuted = !isMuted;
-            document.getElementById('soundToggle').textContent = isMuted ? '🔈' : '🔊';
-        }
-
-        // Initialize game with previous code plus...
-        document.addEventListener('DOMContentLoaded', () => {
-            // Preload the coin sound
-            coinSound.load();
-            
-            // Previous initialization code...
-        });
-    </script>
+    <h1>Mario Math Game</h1>
+    <p>If you can see this, the page is working!</p>
 </body>
 </html>
