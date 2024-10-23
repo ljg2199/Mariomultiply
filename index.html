@@ -5,7 +5,107 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mario Math Game</title>
     <style>
-        /* Previous styles remain */
+        body {
+            font-family: -apple-system, system-ui, BlinkMacSystemFont;
+            margin: 0;
+            padding: 20px;
+            background: #f0f9ff;
+        }
+        
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .title {
+            font-size: 24px;
+            color: #1e40af;
+            text-align: center;
+            margin: 0;
+        }
+        
+        .timer {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #fef08a;
+            border-radius: 8px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .check-button {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .reset-button {
+            background: white;
+            color: #22c55e;
+            border: 2px solid #22c55e;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        th, td {
+            border: 1px solid #93c5fd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        th {
+            background: #dbeafe;
+        }
+        
+        input {
+            width: 50px;
+            padding: 8px;
+            border: 1px solid #93c5fd;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        .correct { background: #dcfce7; }
+        .incorrect { background: #fee2e2; }
+        
+        .score {
+            background: #fef08a;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        /* Coin chest styles */
         .coin-chest {
             background: #8B4513;
             border: 4px solid #654321;
@@ -116,7 +216,20 @@
 </head>
 <body>
     <div class="game-container">
-        <!-- Previous header and controls remain -->
+        <div class="header">
+            <h1 class="title">Super Mario Math!</h1>
+            <button onclick="toggleSound()">🔊</button>
+        </div>
+        
+        <div id="timer" class="timer">5:00</div>
+        
+        <div class="controls">
+            <button class="check-button" onclick="checkAnswers()">Check Answers</button>
+            <button class="reset-button" onclick="resetGame()">Reset</button>
+            <div id="score" class="score"></div>
+        </div>
+
+        <table id="gameGrid"></table>
 
         <div class="chest-container">
             <div class="chest-lid"></div>
@@ -142,13 +255,56 @@
                 </div>
             </div>
         </div>
-
-        <table id="gameGrid"></table>
     </div>
 
     <script>
-        // Previous variables remain
+        const size = 12;
+        const correctAnswers = {};
+        let userAnswers = {};
+        let timeLeft = 300;
+        let timerInterval;
+        let isMuted = false;
         let coinCount = 0;
+        
+        const coinSound = new Audio('https://themushroomkingdom.net/sounds/wav/smb/smb_coin.wav');
+
+        function createGrid() {
+            const grid = document.getElementById('gameGrid');
+            
+            // Header row
+            const headerRow = document.createElement('tr');
+            headerRow.appendChild(document.createElement('th'));
+            for (let i = 1; i <= size; i++) {
+                const th = document.createElement('th');
+                th.textContent = i;
+                headerRow.appendChild(th);
+            }
+            grid.appendChild(headerRow);
+            
+            // Grid rows
+            for (let i = 1; i <= size; i++) {
+                const row = document.createElement('tr');
+                const rowHeader = document.createElement('th');
+                rowHeader.textContent = i;
+                row.appendChild(rowHeader);
+                
+                for (let j = 1; j <= size; j++) {
+                    const cell = document.createElement('td');
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.min = '1';
+                    input.dataset.row = i;
+                    input.dataset.col = j;
+                    correctAnswers[`${i}-${j}`] = i * j;
+                    
+                    input.addEventListener('input', handleInput);
+                    input.addEventListener('keyup', handleKeyUp);
+                    cell.appendChild(input);
+                    row.appendChild(cell);
+                }
+                grid.appendChild(row);
+            }
+        }
 
         function addCoinToChest() {
             const chest = document.getElementById('coinChest');
@@ -159,8 +315,6 @@
             
             coinCount++;
             document.getElementById('coinCount').textContent = coinCount;
-            
-            // Update shop items based on coin count
             updateShopItems();
         }
 
@@ -181,10 +335,9 @@
                 coinCount -= price;
                 document.getElementById('coinCount').textContent = coinCount;
                 alert(`Congratulations! You got a ${itemName}!`);
-                // Remove coins from chest
                 const chest = document.getElementById('coinChest');
                 for (let i = 0; i < price; i++) {
-                    if (chest.lastChild) {
+                    if (chest.lastChild && chest.lastChild.className === 'coin') {
                         chest.removeChild(chest.lastChild);
                     }
                 }
@@ -208,7 +361,6 @@
             }
         }
 
-        // Remove the automatic move to next input
         function handleKeyUp(event) {
             if (event.key === 'Enter' || event.key === 'Tab') {
                 const currentCell = event.target.parentElement;
@@ -219,10 +371,89 @@
             }
         }
 
-        // Rest of the previous code remains the same...
+        function checkAnswers() {
+            let correct = 0;
+            const inputs = document.querySelectorAll('input');
+            
+            inputs.forEach(input => {
+                const row = input.dataset.row;
+                const col = input.dataset.col;
+                const value = userAnswers[`${row}-${col}`];
+                
+                if (value === correctAnswers[`${row}-${col}`]) {
+                    input.classList.add('correct');
+                    input.classList.remove('incorrect');
+                    correct++;
+                } else {
+                    input.classList.add('incorrect');
+                    input.classList.remove('correct');
+                }
+            });
+            
+            const score = document.getElementById('score');
+            score.textContent = `Score: ${correct} / ${size * size}`;
+            score.style.display = 'block';
+
+            if (correct === size * size) {
+                alert('Perfect Score! 🌟');
+            }
+        }
+
+        function resetGame() {
+            userAnswers = {};
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.value = '';
+                input.classList.remove('correct', 'incorrect');
+            });
+            document.getElementById('score').style.display = 'none';
+            
+            // Reset timer
+            clearInterval(timerInterval);
+            timeLeft = 300;
+            updateTimer();
+            startTimer();
+            
+            // Clear coin chest
+            document.getElementById('coinChest').innerHTML = '<div class="coin-counter">Coins: <span id="coinCount">0</span></div>';
+            coinCount = 0;
+            updateShopItems();
+        }
+
+        function toggleSound() {
+            isMuted = !isMuted;
+            const soundButton = document.querySelector('button');
+            soundButton.textContent = isMuted ? '🔈' : '🔊';
+        }
+
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimer();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    checkAnswers();
+                    alert('Time\'s up!');
+                }
+            }, 1000);
+        }
+
+        // Initialize game
+        document.addEventListener('DOMContentLoaded', () => {
+            createGrid();
+            startTimer();
+            updateShopItems();
+        });
     </script>
 </body>
 </html>
 
-        
-  
+    
