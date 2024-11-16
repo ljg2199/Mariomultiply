@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Super Mario Math Adventure - A fun way to practice multiplication">
     <title>Super Mario Math Adventure</title>
     <style>
         /* Base styles */
         body {
-            font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: -apple-system, system-ui, BlinkMacSystemFont;
             margin: 0;
             padding: 20px;
             background: linear-gradient(135deg, #87CEEB 0%, #B0E0E6 100%);
-            min-height: 100vh;
         }
 
         .game-container {
@@ -24,147 +22,566 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
-        /* Improved accessibility and focus states */
-        input:focus {
-            outline: 2px solid #4B0082;
-            box-shadow: 0 0 3px rgba(75, 0, 130, 0.5);
+        /* Timer styles */
+        .timer {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #fef08a;
+            border-radius: 8px;
         }
 
-        button:focus {
-            outline: 2px solid #4B0082;
-            box-shadow: 0 0 3px rgba(75, 0, 130, 0.5);
+        .timer.warning {
+            background: #fee2e2;
+            color: #dc2626;
+            animation: pulse 1s infinite;
         }
 
-        /* Rest of your existing styles... */
-        /* [Previous styles remain the same] */
+        /* Best time tracking */
+        .time-tracking {
+            background: #FFE4B5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #DEB887;
+        }
+
+        .best-time {
+            color: #006400;
+            font-weight: bold;
+        }
+
+        .current-time {
+            color: #8B0000;
+            font-weight: bold;
+        }
+
+        /* Game grid styles */
+        .game-grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .game-grid th,
+        .game-grid td {
+            border: 1px solid #93c5fd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .game-grid th {
+            background: #dbeafe;
+        }
+
+        input[type="number"] {
+            width: 50px;
+            padding: 8px;
+            border: 1px solid #93c5fd;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        /* Coin styles */
+        .coin-container {
+            background: #8B4513;
+            border: 4px solid #654321;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            min-height: 100px;
+            position: relative;
+        }
+
+        .coin {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: #FFD700;
+            border-radius: 50%;
+            margin: 2px;
+            text-align: center;
+            line-height: 20px;
+            font-size: 12px;
+            color: #B8860B;
+            animation: coinPop 0.3s ease-out;
+        }
+
+        .coin.quarter {
+            background: #C0C0C0;
+            color: #4A4A4A;
+        }
+
+        @keyframes coinPop {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        /* Bank vault styles */
+        .vault-container {
+            background: #4A4A4A;
+            border: 8px solid #2F2F2F;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #FFD700;
+            position: relative;
+            min-height: 150px;
+        }
+
+        .vault-door {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            width: 80px;
+            height: 130px;
+            background: #696969;
+            border: 4px solid #2F2F2F;
+            border-radius: 5px;
+        }
+
+        .vault-dial {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #FFD700;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .banked-time {
+            margin-left: 100px;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Shop styles */
+        .mario-shop {
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%2387CEEB"/><rect y="60" width="100" height="40" fill="%23228B22"/></svg>');
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 5px solid #4A3000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .shop-item {
+            background: linear-gradient(135deg, #fff 0%, #f9f9f9 100%);
+            border: 3px solid #4B0082;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px;
+            width: 200px;
+            text-align: center;
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .shop-item:hover {
+            transform: scale(1.05);
+        }
+
+        /* Certificate styles */
+        .certificate {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border: 5px solid #8B4513;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+            position: relative;
+            display: none;
+        }
+
+        /* Parent approval styles */
+        .parent-approval {
+            background: #E6E6FA;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .button-primary {
+            background: #4B0082;
+            color: white;
+        }
+
+        .button-secondary {
+            background: white;
+            color: #4B0082;
+            border: 2px solid #4B0082;
+        }
+
+        @media print {
+            .certificate {
+                display: block;
+                break-inside: avoid;
+            }
+            body * {
+                visibility: hidden;
+            }
+            .certificate, .certificate * {
+                visibility: visible;
+            }
+            .certificate {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="game-container" id="gameContainer">
-        <header>
-            <h1 class="title">Super Mario Math Adventure</h1>
-            <button onclick="toggleSound()" aria-label="Toggle sound" class="sound-toggle">
-                <span id="soundIcon">🔊</span>
-            </button>
-        </header>
+    <div id="gameContainer" class="game-container">
+        <h1 style="text-align: center; color: #4B0082;">Super Mario Math Adventure</h1>
+        
+        <div class="time-tracking">
+            <div>Best Time: <span id="bestTime" class="best-time">--:--</span></div>
+            <div>Current Time: <span id="currentTime" class="current-time">5:00</span></div>
+        </div>
 
-        <!-- Rest of your HTML structure... -->
-        <!-- [Previous HTML remains the same] -->
+        <div id="timer" class="timer">5:00</div>
+        
+        <div class="controls">
+            <button class="button button-primary" onclick="checkAnswers()">Check Answers</button>
+            <button class="button button-secondary" onclick="resetGame()">Reset</button>
+            <button class="button button-secondary" onclick="toggleSound()">🔊</button>
+        </div>
+
+        <div id="gameGrid"></div>
+
+        <div class="coin-container" id="coinContainer">
+            <div style="text-align: right; font-weight: bold; color: white;">
+                Coins: <span id="coinCount">0</span>
+            </div>
+        </div>
+
+        <div class="vault-container">
+            <div class="vault-door">
+                <div class="vault-dial"></div>
+            </div>
+            <div class="banked-time">
+                Banked iPad Time: <span id="bankedMinutes">0</span> minutes
+            </div>
+        </div>
+
+        <div class="mario-shop">
+            <h2 style="text-align: center; color: #4B0082;">Princess Peach's Time Bank</h2>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center;">
+                <div class="shop-item" onclick="purchaseTime(50, 5)">
+                    <div>🍄 Quick Break</div>
+                    <div>5 minutes</div>
+                    <div>50 coins</div>
+                </div>
+                <div class="shop-item" onclick="purchaseTime(100, 7)">
+                    <div>⭐ Star Time</div>
+                    <div>7 minutes</div>
+                    <div>100 coins</div>
+                </div>
+                <div class="shop-item" onclick="purchaseTime(150, 10)">
+                    <div>🌟 Super Star Time</div>
+                    <div>10 minutes</div>
+                    <div>150 coins</div>
+                </div>
+                <div class="shop-item" onclick="purchaseTime(250, 20)">
+                    <div>👑 Royal Time</div>
+                    <div>20 minutes</div>
+                    <div>250 coins</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="parent-approval">
+            <h3>Redeem Banked Time</h3>
+            <div class="approval-checkbox">
+                <input type="checkbox" id="parentApproval">
+                <label for="parentApproval">Parent Approval</label>
+            </div>
+            <button class="button button-primary" onclick="redeemTime()">Redeem Time</button>
+            <button class="button button-secondary" onclick="printCertificate()">Print Certificate</button>
+        </div>
     </div>
 
+    <div id="certificate" class="certificate">
+        <div style="position: absolute; top: 10px; left: 10px; font-size: 40px;">👨‍🔧</div>
+        <div style="position: absolute; top: 10px; right: 10px; font-size: 40px;">👸</div>
+        <h2>Super Mario Math Time Reward</h2>
+        <p>This certifies that</p>
+        <h3 id="certificateTime">0 minutes</h3>
+        <p>of iPad time has been earned</p>
+        <div style="margin: 20px 0;">
+            <p>Parent Signature: _____________________</p>
+            <p>Date: <span id="certificateDate"></span></p>
+        </div>
+    </div>
     <script>
-        // Constants
-        const GAME_CONFIG = {
-            GRID_SIZE: 12,
-            INITIAL_TIME: 300,
-            COIN_SOUND_URL: 'https://themushroomkingdom.net/sounds/wav/smb/smb_coin.wav'
-        };
+        // Game variables
+        let timeLeft = 300; // 5 minutes
+        let timerInterval;
+        let bestTime = localStorage.getItem('bestTime') || null;
+        let currentTime = 0;
+        let coins = 0;
+        let bankedMinutes = 0;
+        let isTimerActive = false;
+        let quarterMode = false;
+        let isMuted = false;
+        const size = 12;
+        const correctAnswers = {};
+        const userAnswers = {};
 
-        // State management
-        const gameState = {
-            timeLeft: GAME_CONFIG.INITIAL_TIME,
-            correctAnswers: {},
-            userAnswers: {},
-            coins: 0,
-            isMuted: false,
-            timerInterval: null,
-            coinSound: new Audio(GAME_CONFIG.COIN_SOUND_URL)
-        };
+        // Audio setup
+        const marioTheme = new Audio('https://themushroomkingdom.net/sounds/wav/sm64/sm64_mario_lets_go.wav');
+        const coinSound = new Audio('https://themushroomkingdom.net/sounds/wav/smb/smb_coin.wav');
+        marioTheme.loop = true;
 
-        // Improved error handling for audio
-        gameState.coinSound.addEventListener('error', (e) => {
-            console.error('Error loading coin sound:', e);
-            // Fallback to silent operation if sound fails to load
-            gameState.isMuted = true;
+        // Initialize game
+        document.addEventListener('DOMContentLoaded', () => {
+            createGrid();
+            loadBankedTime();
+            updateBestTime();
+            document.addEventListener('input', startTimerOnFirstInput, { once: true });
         });
 
-        // Input validation
-        function validateInput(value, row, col) {
-            const numValue = parseInt(value);
-            if (isNaN(numValue) || numValue < 0 || numValue > row * col) {
-                return false;
+        function createGrid() {
+            const grid = document.getElementById('gameGrid');
+            const table = document.createElement('table');
+            table.className = 'game-grid';
+            
+            // Header row
+            const headerRow = document.createElement('tr');
+            headerRow.appendChild(document.createElement('th'));
+            for (let i = 1; i <= size; i++) {
+                const th = document.createElement('th');
+                th.textContent = i;
+                headerRow.appendChild(th);
             }
-            return true;
+            table.appendChild(headerRow);
+            
+            // Grid rows
+            for (let i = 1; i <= size; i++) {
+                const row = document.createElement('tr');
+                const rowHeader = document.createElement('th');
+                rowHeader.textContent = i;
+                row.appendChild(rowHeader);
+                
+                for (let j = 1; j <= size; j++) {
+                    const cell = document.createElement('td');
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.min = '1';
+                    input.dataset.row = i;
+                    input.dataset.col = j;
+                    correctAnswers[`${i}-${j}`] = i * j;
+                    
+                    input.addEventListener('input', handleInput);
+                    input.addEventListener('keyup', handleKeyUp);
+                    cell.appendChild(input);
+                    row.appendChild(cell);
+                }
+                table.appendChild(row);
+            }
+            grid.appendChild(table);
         }
 
-        // Enhanced handleInput function
+        function startTimerOnFirstInput() {
+            if (!isTimerActive) {
+                isTimerActive = true;
+                quarterMode = false;
+                startTimer();
+                if (!isMuted) {
+                    marioTheme.play();
+                }
+            }
+        }
+
         function handleInput(event) {
             const input = event.target;
-            const row = parseInt(input.dataset.row);
-            const col = parseInt(input.dataset.col);
-            const value = input.value.trim();
-
-            if (value === '') {
-                delete gameState.userAnswers[`${row}-${col}`];
-                return;
-            }
-
-            if (!validateInput(value, row, col)) {
-                input.value = '';
-                return;
-            }
-
-            const numValue = parseInt(value);
-            gameState.userAnswers[`${row}-${col}`] = numValue;
-
-            if (numValue === gameState.correctAnswers[`${row}-${col}`]) {
-                if (!gameState.isMuted) {
-                    playSuccessSound();
+            const row = input.dataset.row;
+            const col = input.dataset.col;
+            const value = input.value === '' ? '' : parseInt(input.value);
+            const previousValue = userAnswers[`${row}-${col}`];
+            userAnswers[`${row}-${col}`] = value;
+            
+            if (value === correctAnswers[`${row}-${col}`] && value !== previousValue) {
+                if (isTimerActive) {
+                    addCoins(1);
+                } else if (quarterMode) {
+                    addCoins(0.25);
                 }
-                addCoinToChest();
-                highlightCorrectAnswer(input);
             }
         }
 
-        // Improved sound handling
-        function playSuccessSound() {
-            try {
-                gameState.coinSound.currentTime = 0;
-                gameState.coinSound.play().catch(e => {
-                    console.error('Error playing sound:', e);
-                    gameState.isMuted = true;
-                });
-            } catch (e) {
-                console.error('Error with audio playback:', e);
-                gameState.isMuted = true;
+        function handleKeyUp(event) {
+            if (event.key === 'Enter' || event.key === 'Tab') {
+                const inputs = document.querySelectorAll('input[type="number"]');
+                const currentIndex = Array.from(inputs).indexOf(event.target);
+                if (currentIndex < inputs.length - 1) {
+                    inputs[currentIndex + 1].focus();
+                }
             }
         }
 
-        // More robust timer management
         function startTimer() {
-            if (gameState.timerInterval) {
-                clearInterval(gameState.timerInterval);
-            }
-
-            gameState.timerInterval = setInterval(() => {
-                if (gameState.timeLeft <= 0) {
-                    clearInterval(gameState.timerInterval);
-                    endGame();
-                    return;
-                }
-
-                gameState.timeLeft--;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                currentTime++;
                 updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    isTimerActive = false;
+                    quarterMode = true;
+                    marioTheme.pause();
+                    checkAnswers();
+                    alert('Time\'s up! Now entering quarter-coin mode!');
+                }
             }, 1000);
         }
 
-        // Game initialization with error handling
-        function initializeGame() {
-            try {
-                createGrid();
-                loadSavedState();
-                startTimer();
-                updateShopItems();
-            } catch (e) {
-                console.error('Error initializing game:', e);
-                alert('There was an error starting the game. Please refresh the page.');
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function addCoins(amount) {
+            if (!isMuted) {
+                coinSound.currentTime = 0;
+                coinSound.play();
+            }
+            coins += amount;
+            document.getElementById('coinCount').textContent = coins.toFixed(2);
+            createCoinVisual(amount === 1 ? 'full' : 'quarter');
+        }
+
+        function createCoinVisual(type) {
+            const coin = document.createElement('div');
+            coin.className = `coin ${type === 'quarter' ? 'quarter' : ''}`;
+            coin.textContent = type === 'quarter' ? '¼' : '¢';
+            document.getElementById('coinContainer').appendChild(coin);
+        }
+
+        function purchaseTime(cost, minutes) {
+            if (coins >= cost) {
+                const speedPenalty = currentTime > bestTime && bestTime !== null;
+                const adjustedMinutes = speedPenalty ? Math.floor(minutes * 0.7) : minutes;
+                
+                coins -= cost;
+                document.getElementById('coinCount').textContent = coins.toFixed(2);
+                bankedMinutes += adjustedMinutes;
+                saveBankedTime();
+                updateBankDisplay();
+                
+                if (speedPenalty) {
+                    alert(`Speed Penalty Applied! Earned ${adjustedMinutes} minutes instead of ${minutes} minutes`);
+                } else {
+                    alert(`Banked ${adjustedMinutes} minutes of iPad time!`);
+                }
+            } else {
+                alert(`Need ${(cost - coins).toFixed(2)} more coins!`);
             }
         }
 
-        // Add event listeners when DOM is ready
-        document.addEventListener('DOMContentLoaded', initializeGame);
+        function redeemTime() {
+            if (!document.getElementById('parentApproval').checked) {
+                alert('Need parent approval to redeem time!');
+                return;
+            }
+            
+            if (bankedMinutes <= 0) {
+                alert('No time available to redeem!');
+                return;
+            }
+            
+            printCertificate();
+            bankedMinutes = 0;
+            saveBankedTime();
+            updateBankDisplay();
+        }
 
-        // [Rest of your JavaScript code remains the same but with similar improvements]
+        function printCertificate() {
+            document.getElementById('certificateTime').textContent = `${bankedMinutes} minutes`;
+            document.getElementById('certificateDate').textContent = new Date().toLocaleDateString();
+            window.print();
+        }
+
+        function toggleSound() {
+            isMuted = !isMuted;
+            const soundButton = document.querySelector('button:last-of-type');
+            soundButton.textContent = isMuted ? '🔈' : '🔊';
+            
+            if (isMuted) {
+                marioTheme.pause();
+            } else if (isTimerActive) {
+                marioTheme.play();
+            }
+        }
+
+        function updateBankDisplay() {
+            document.getElementById('bankedMinutes').textContent = bankedMinutes;
+        }
+
+        function saveBankedTime() {
+            localStorage.setItem('bankedMinutes', bankedMinutes.toString());
+        }
+
+        function loadBankedTime() {
+            bankedMinutes = parseInt(localStorage.getItem('bankedMinutes')) || 0;
+            updateBankDisplay();
+        }
+
+        function updateBestTime() {
+            if (bestTime) {
+                const minutes = Math.floor(bestTime / 60);
+                const seconds = bestTime % 60;
+                document.getElementById('bestTime').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        function resetGame() {
+            clearInterval(timerInterval);
+            timeLeft = 300;
+            currentTime = 0;
+            isTimerActive = false;
+            quarterMode = false;
+            updateTimerDisplay();
+            
+            // Clear answers
+            Object.keys(userAnswers).forEach(key => delete userAnswers[key]);
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.value = '';
+                input.classList.remove('correct', 'incorrect');
+            });
+            
+            // Reset coins
+            coins = 0;
+            document.getElementById('coinCount').textContent = '0';
+            document.getElementById('coinContainer').innerHTML = 
+                '<div style="text-align: right; font-weight: bold; color: white;">Coins: <span id="coinCount">0</span></div>';
+            
+            marioTheme.pause();
+            marioTheme.currentTime = 0;
+            
+            // Re-enable first input trigger
+            document.addEventListener('input', startTimerOnFirstInput, { once: true });
+        }
     </script>
 </body>
 </html>
